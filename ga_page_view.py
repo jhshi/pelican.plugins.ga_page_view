@@ -98,9 +98,16 @@ def get_page_view(generators):
     page_view[slug] = int(pv)
 
   article_generator = [g for g in generators if type(g) is ArticlesGenerator][0]
-  page_generator= [g for g in generators if type(g) is PagesGenerator][0]
+  page_generator = [g for g in generators if type(g) is PagesGenerator][0]
 
-  print article_generator.articles[0].__dict__.keys()
+  ARTICLE_SAVE_AS = generator.settings['ARTICLE_SAVE_AS']
+  PAGE_SAVE_AS = generator.settings['PAGE_SAVE_AS']
+
+  for pages, url_pattern in [(article_generator.articles, ARTICLE_SAVE_AS), (page_generator.pages, PAGE_SAVE_AS)]:
+    for page in pages:
+      url = '/%s' % (url_pattern.format(**page.__dict__))
+      if url in page_view:
+        setattr(page, 'pageview', page_view[url])
 
 
 def register():
