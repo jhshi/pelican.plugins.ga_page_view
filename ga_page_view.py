@@ -103,11 +103,17 @@ def get_page_view(generators):
   ARTICLE_SAVE_AS = generator.settings['ARTICLE_SAVE_AS']
   PAGE_SAVE_AS = generator.settings['PAGE_SAVE_AS']
 
-  for pages, url_pattern in [(article_generator.articles, ARTICLE_SAVE_AS), (page_generator.pages, PAGE_SAVE_AS)]:
+  total_page_view = 0
+  for pages, url_pattern in [(article_generator.articles, ARTICLE_SAVE_AS),\
+      (page_generator.pages, PAGE_SAVE_AS)]:
     for page in pages:
       url = '/%s' % (url_pattern.format(**page.__dict__))
-      if url in page_view:
-        setattr(page, 'pageview', page_view[url])
+      pv = page_view.get(url, 0)
+      setattr(page, 'pageview', pv)
+      total_page_view += pv
+
+  generator.context['total_page_view'] = total_page_view
+
 
 
 def register():
