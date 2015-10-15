@@ -57,6 +57,27 @@ that article or page. And there is one global context named ``total_page_view``,
 which is the total page view of the entire site.
 
 
+Note
+----
+
+If you encounter this error while building:
+
+.. code-block:: bash
+
+    NotImplementedError: PKCS12 format is not supported by the PyCrypto library.
+
+Try convert the ``p12`` file to ``pem`` file:
+
+.. code-block:: bash
+
+    $ openssl pkcs12 -in client_private.p12 -nodes -nocerts > client_private.pem
+
+The password should be ``notasecret``.
+
+Then set ``GOOGLE_KEY_FILE`` to be the ``pem`` file just generated.
+
+
+
 Resources
 ---------
 
