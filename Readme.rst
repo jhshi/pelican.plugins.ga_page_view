@@ -1,5 +1,5 @@
-Page View by Google Analytics
-=============================
+Page View using Google Analytics
+================================
 
 If you track your site's page view using Google Analytics, this plugin can pull
 the page view information from your Google Analytics profile and add a
