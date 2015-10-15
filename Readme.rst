@@ -13,7 +13,7 @@ Requirements and Setup
 ----------------------
 
 First, follow the `instructions here
-<https://developers.google.com/analytics/devguides/reporting/core/v3/quickstart/service-py`_
+<https://developers.google.com/analytics/devguides/reporting/core/v3/quickstart/service-py>`_
 to set up Google API service account.
 
 Then in Google Analytics, add the email address you created above as an user so
@@ -22,7 +22,9 @@ that we can access the Google Anaytics API.
 At this point, you should have:
 
 - Google API service email: ``<prioject_id>-<unique_id>@developer.gserviceaccount.com``
-- Google private key file: ``client_private.p12``
+- Google private key file: ``client_private.p12``. Save this file somewhere
+  secure. If you put this file in a Git repository, don't forget to add it to
+  ``.gitignore``.
 
 
 Finally, install the Google API Python library:
@@ -35,8 +37,8 @@ Finally, install the Google API Python library:
 Settings
 --------
 
-You need to provide the following information for this plugin to communicate
-with the Google Analytics API.
+You need to provide the following information in your Pelican configuration file
+for this plugin to communicate with the Google Analytics API.
 
 - ``GOOGLE_SERVICE_ACCOUNT``: the service email.
 - ``GOOGLE_KEY_FILE``: path to the private key file, E.g.
@@ -45,7 +47,7 @@ with the Google Analytics API.
 - ``GA_END_DATE``: end date to count page view. E.g., ``today``.
 - ``GA_METRIC``: counting metrics, default is ``ga:pageview``. See other options
   `here
-  https://developers.google.com/analytics/devguides/reporting/core/dimsmets`_.
+  <https://developers.google.com/analytics/devguides/reporting/core/dimsmets>`_.
   Right now we only support query with ONE metric.
 
 
@@ -59,6 +61,6 @@ Resources
 ---------
 
 - `Google Analytics Core Reporting API
-  <https://developers.google.com/analytics/devguides/reporting/core/v3/reference`_
+  <https://developers.google.com/analytics/devguides/reporting/core/v3/reference>`_
 - `Google Analytics Query Explorer
   <https://ga-dev-tools.appspot.com/query-explorer/>`_
