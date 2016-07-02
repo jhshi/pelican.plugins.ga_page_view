@@ -45,7 +45,7 @@ for this plugin to communicate with the Google Analytics API.
   ``./client_private.p12``.
 - ``GA_START_DATE``: start date to count page view. E.g., ``2005-01-01``.
 - ``GA_END_DATE``: end date to count page view. E.g., ``today``.
-- ``GA_METRIC``: counting metrics, default is ``ga:pageview``. See other options
+- ``GA_METRIC``: counting metrics, default is ``ga:pageviews``. See other options
   `here
   <https://developers.google.com/analytics/devguides/reporting/core/dimsmets>`_.
   Right now we only support query with ONE metric.
