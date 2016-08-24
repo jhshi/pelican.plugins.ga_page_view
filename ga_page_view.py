@@ -89,7 +89,8 @@ def get_page_view(generators):
 
   try:
     result = service.data().ga().get(ids='ga:'+profile_id, start_date=start_date,\
-        end_date=end_date, metrics=metric, dimensions='ga:pagePath').execute()
+        end_date=end_date, max_results=999999, metrics=metric,
+                                     dimensions='ga:pagePath').execute()
   except:
     raise
 
@@ -108,7 +109,11 @@ def get_page_view(generators):
       (page_generator.pages, PAGE_SAVE_AS)]:
     for page in pages:
       url = '/%s' % (url_pattern.format(**page.__dict__))
-      pv = page_view.get(url, 0)
+      if url not in page_view:
+          print "Page not found: %s" % (url)
+          pv = 0
+      else:
+        pv = page_view[url]
       setattr(page, 'pageview', pv)
       total_page_view += pv
 
