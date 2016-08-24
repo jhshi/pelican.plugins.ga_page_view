@@ -49,11 +49,19 @@ for this plugin to communicate with the Google Analytics API.
   `here
   <https://developers.google.com/analytics/devguides/reporting/core/dimsmets>`_.
   Right now we only support query with ONE metric.
+- ``POPULAR_POST_START``: start date to count popular page views. E.g., ``A
+  month ago``.
 
 
-With this plugin installed, each ``article`` and ``page`` object has one extra
-meta data called ``pageview``, which is an integer of the page view count of
-that article or page. And there is one global context named ``total_page_view``,
+With this plugin installed, each ``article`` and ``page`` object has two extra
+attributes:
+
+- ``pageview``: total number of page views between ``GA_START_DATE`` and
+  ``GA_END_DATE``.
+- ``popular_pageview``: total number of page view between ``POPULAR_POST_START``
+  and ``GA_END_DATE``.
+
+And there is one global context named ``total_page_view``,
 which is the total page view of the entire site.
 
 

@@ -10,116 +10,126 @@ from oauth2client import client
 from oauth2client import file
 from oauth2client import tools
 
+import parsedatetime as pdt
+import datetime
+
 
 def get_service(api_name, api_version, scope, key_file_location,
                 service_account_email):
-  """Get a service that communicates to a Google API.
+    """Get a service that communicates to a Google API.
 
-  Args:
-    api_name: The name of the api to connect to.
-    api_version: The api version to connect to.
-    scope: A list auth scopes to authorize for the application.
-    key_file_location: The path to a valid service account p12 key file.
-    service_account_email: The service account email address.
+    Args:
+      api_name: The name of the api to connect to.
+      api_version: The api version to connect to.
+      scope: A list auth scopes to authorize for the application.
+      key_file_location: The path to a valid service account p12 key file.
+      service_account_email: The service account email address.
 
-  Returns:
-    A service that is connected to the specified API.
-  """
+    Returns:
+      A service that is connected to the specified API.
+    """
 
-  f = open(key_file_location, 'rb')
-  key = f.read()
-  f.close()
+    f = open(key_file_location, 'rb')
+    key = f.read()
+    f.close()
 
-  credentials = SignedJwtAssertionCredentials(service_account_email, key,
-    scope=scope)
+    credentials = SignedJwtAssertionCredentials(service_account_email, key,
+                                                scope=scope)
 
-  http = credentials.authorize(httplib2.Http())
+    http = credentials.authorize(httplib2.Http())
 
-  # Build the service object.
-  service = build(api_name, api_version, http=http)
+    # Build the service object.
+    service = build(api_name, api_version, http=http)
 
-  return service
+    return service
 
 
 def get_first_profile_id(service):
-  # Use the Analytics service object to get the first profile id.
+    # Use the Analytics service object to get the first profile id.
 
-  # Get a list of all Google Analytics accounts for this user
-  accounts = service.management().accounts().list().execute()
+    # Get a list of all Google Analytics accounts for this user
+    accounts = service.management().accounts().list().execute()
 
-  if accounts.get('items'):
-    # Get the first Google Analytics account.
-    account = accounts.get('items')[0].get('id')
+    if accounts.get('items'):
+        # Get the first Google Analytics account.
+        account = accounts.get('items')[0].get('id')
 
-    # Get a list of all the properties for the first account.
-    properties = service.management().webproperties().list(
-        accountId=account).execute()
+        # Get a list of all the properties for the first account.
+        properties = service.management().webproperties().list(
+            accountId=account).execute()
 
-    if properties.get('items'):
-      # Get the first property id.
-      property = properties.get('items')[0].get('id')
+        if properties.get('items'):
+            # Get the first property id.
+            property = properties.get('items')[0].get('id')
 
-      # Get a list of all views (profiles) for the first property.
-      profiles = service.management().profiles().list(
-          accountId=account,
-          webPropertyId=property).execute()
+            # Get a list of all views (profiles) for the first property.
+            profiles = service.management().profiles().list(
+                accountId=account,
+                webPropertyId=property).execute()
 
-      if profiles.get('items'):
-        # return the first view (profile) id.
-        return profiles.get('items')[0].get('id')
+            if profiles.get('items'):
+                # return the first view (profile) id.
+                return profiles.get('items')[0].get('id')
 
-  return None
+    return None
 
 
 def get_page_view(generators):
-  generator = generators[0]
-  service_account_email = generator.settings.get('GOOGLE_SERVICE_ACCOUNT', None)
-  key_file_path = generator.settings.get('GOOGLE_KEY_FILE', None)
-  if service_account_email is None or key_file_path is None:
-    return
+    generator = generators[0]
+    service_account_email = generator.settings.get(
+        'GOOGLE_SERVICE_ACCOUNT', None)
+    key_file_path = generator.settings.get('GOOGLE_KEY_FILE', None)
+    if service_account_email is None or key_file_path is None:
+        return
 
-  scope = ['https://www.googleapis.com/auth/analytics.readonly']
-  service = get_service('analytics', 'v3', scope, key_file_path,
-    service_account_email)
-  profile_id = get_first_profile_id(service)
+    scope = ['https://www.googleapis.com/auth/analytics.readonly']
+    service = get_service('analytics', 'v3', scope, key_file_path,
+                          service_account_email)
+    profile_id = get_first_profile_id(service)
 
-  start_date = generator.settings.get('GA_START_DATE', '2005-01-01')
-  end_date = generator.settings.get('GA_END_DATE', 'today')
-  metric = generator.settings.get('GA_METRIC', 'ga:pageviews')
+    start_date = generator.settings.get('GA_START_DATE', '2005-01-01')
+    end_date = generator.settings.get('GA_END_DATE', 'today')
+    metric = generator.settings.get('GA_METRIC', 'ga:pageviews')
 
-  try:
-    result = service.data().ga().get(ids='ga:'+profile_id, start_date=start_date,\
-        end_date=end_date, max_results=999999, metrics=metric,
+    result = service.data().ga().get(ids='ga:' + profile_id, start_date=start_date,
+                                     end_date=end_date, max_results=999999, metrics=metric,
                                      dimensions='ga:pagePath').execute()
-  except:
-    raise
+    page_view = dict()
+    for slug, pv in result['rows']:
+        page_view[slug] = int(pv)
 
-  page_view = dict()
-  for slug, pv in result['rows']:
-    page_view[slug] = int(pv)
+    popular_start_str = generator.settings.get('POPULAR_POST_START', 'a month ago')
+    popular_start_date = str(pdt.Calendar().parseDT(
+        popular_start_str, datetime.datetime.now())[0].date())
+    popular_result = service.data().ga().get(
+        ids='ga:' + profile_id, start_date=popular_start_date,
+        end_date=end_date, max_results=999999, metrics=metric,
+        dimensions='ga:pagePath').execute()
 
-  article_generator = [g for g in generators if type(g) is ArticlesGenerator][0]
-  page_generator = [g for g in generators if type(g) is PagesGenerator][0]
+    popular_page_view = dict()
+    for slug, pv in popular_result['rows']:
+        popular_page_view[slug] = int(pv)
 
-  ARTICLE_SAVE_AS = generator.settings['ARTICLE_SAVE_AS']
-  PAGE_SAVE_AS = generator.settings['PAGE_SAVE_AS']
+    article_generator = [g for g in generators if type(g) is ArticlesGenerator][0]
+    page_generator = [g for g in generators if type(g) is PagesGenerator][0]
 
-  total_page_view = 0
-  for pages, url_pattern in [(article_generator.articles, ARTICLE_SAVE_AS),\
-      (page_generator.pages, PAGE_SAVE_AS)]:
-    for page in pages:
-      url = '/%s' % (url_pattern.format(**page.__dict__))
-      if url not in page_view:
-          print "Page not found: %s" % (url)
-          pv = 0
-      else:
-        pv = page_view[url]
-      setattr(page, 'pageview', pv)
-      total_page_view += pv
+    ARTICLE_SAVE_AS = generator.settings['ARTICLE_SAVE_AS']
+    PAGE_SAVE_AS = generator.settings['PAGE_SAVE_AS']
 
-  generator.context['total_page_view'] = total_page_view
+    total_page_view = 0
+    for pages, url_pattern in [(article_generator.articles, ARTICLE_SAVE_AS),
+                               (page_generator.pages, PAGE_SAVE_AS)]:
+        for page in pages:
+            url = '/%s' % (url_pattern.format(**page.__dict__))
+            pv = page_view.get(url, 0)
+            if url not in page_view:
+                print "Page not found: %s" % (url)
+            setattr(page, 'pageview', pv)
+            setattr(page, 'popular_pageview', popular_page_view.get(url, 0))
+            total_page_view += pv
 
+    generator.context['total_page_view'] = total_page_view
 
 
 def register():
-  signals.all_generators_finalized.connect(get_page_view)
+    signals.all_generators_finalized.connect(get_page_view)
