@@ -3,11 +3,11 @@ Page View using Google Analytics
 
 If you track your site's page view using Google Analytics, this plugin can pull
 the page view information from your Google Analytics profile and add a
-``page_view`` attribute to each article and page in your Pelican site. See a
-live example here.
+``page_view`` attribute to each article and page in your Pelican site. See few
+live examples here.
 
-http://jhshi.me
-
+- http://jhshi.me
+- http://leemengtaiwan.github.io
 
 Requirements and Setup
 ----------------------
@@ -17,7 +17,8 @@ First, follow the `instructions here
 to set up Google API service account.
 
 Then in Google Analytics, add the email address you created above as an user so
-that we can access the Google Anaytics API.
+that we can access the Google Anaytics API. Also make sure you have enabled ``Analytics API`` access for
+the newly created project.
 
 At this point, you should have:
 
@@ -33,6 +34,11 @@ Finally, install the Google API Python library:
 
     $ pip install --upgrade google-api-python-client
 
+You may also need other dependencies specified in ``requirements.txt``. To install all the dependencies at once, use:
+
+.. code-block:: bash
+
+    $ pip install -r requirements.txt
 
 Settings
 --------
@@ -62,8 +68,14 @@ attributes:
   and ``GA_END_DATE``.
 
 And there is one global context named ``total_page_view``,
-which is the total page view of the entire site.
+which is the total page view of the entire site. You may want to show the number at page like ``index.html``:
 
+
+.. code-block::
+
+    <div class="page_view">
+    The total number of page views of this site is {{ total_page_view }}.
+    </div>
 
 Note
 ----
