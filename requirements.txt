@@ -1,4 +1,4 @@
-parsedatetime --upgrade
-google-api-python-client --upgrade
-oauth2client --upgrade
-PyOpenSSL --upgrade
+parsedatetime
+google-api-python-client
+oauth2client
+PyOpenSSL
